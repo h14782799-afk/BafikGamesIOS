@@ -1,0 +1,28 @@
+workflows:
+  ios-workflow:
+    name: BafikGames iOS Build
+    environment:
+      xcode: latest
+      cocoapods: default
+    triggering:
+      events:
+        - push
+    scripts:
+      - name: Build Xcode project
+        script: |
+          xcodebuild -project Unity-iPhone.xcodeproj \
+            -scheme Unity-iPhone \
+            -sdk iphoneos \
+            -configuration Release \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            archive \
+            -archivePath $CM_BUILD_DIR/build/Unity-iPhone.xcarchive
+      - name: Create IPA
+        script: |
+          mkdir -p Payload
+          cp -r $CM_BUILD_DIR/build/Unity-iPhone.xcarchive/Products/Applications/*.app Payload/
+          zip -r BafikGames.ipa Payload
+    artifacts:
+      - BafikGames.ipa
